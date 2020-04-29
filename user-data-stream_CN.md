@@ -1,83 +1,94 @@
-# Websocket账户接口 (2018-11-13)
+# Websocket 账户接口 (2018-11-13)
 
 # 基本信息
-* 本篇所列出REST接口的baseurl **https://api.binance.com**
-* 用于订阅账户数据的 `listenKey` 从创建时刻起有效期为60分钟
-* 可以通过`PUT`一个`listenKey`延长60分钟有效期
-* `DELETE`一个 `listenKey` 立即关闭当前数据流
-* 本篇所列出的websocket接口baseurl: **wss://stream.binance.com:9443**
-* 订阅账户数据流的stream名称为 **/ws/\<listenKey\>**
-* 每个到stream.binance.com的链接有效期不超过24小时，请妥善处理断线重连。
-* 账户数据流的消息**不保证**严格时间序; **请使用 E 字段进行排序**
 
-# 与Websocket账户接口相关的REST接口
+- 本篇所列出 REST 接口的 baseurl **https://api.binance.com**
+- 用于订阅账户数据的 `listenKey` 从创建时刻起有效期为 60 分钟
+- 可以通过`PUT`一个`listenKey`延长 60 分钟有效期
+- `DELETE`一个 `listenKey` 立即关闭当前数据流
+- 本篇所列出的 websocket 接口 baseurl: **wss://stream.binance.com:9443**
+- 订阅账户数据流的 stream 名称为 **/ws/\<listenKey\>**
+- 每个到 stream.binance.com 的链接有效期不超过 24 小时，请妥善处理断线重连。
+- 账户数据流的消息**不保证**严格时间序; **请使用 E 字段进行排序**
 
-## 生成listenKey
+# 与 Websocket 账户接口相关的 REST 接口
+
+## 生成 listenKey
+
 ```
 POST /api/v1/userDataStream
 ```
-创建一个新的user data stream，返回值为一个listenKey，即websocket订阅的stream名称。
 
-**权重:**
-1
+创建一个新的 user data stream，返回值为一个 listenKey，即 websocket 订阅的
+stream 名称。
 
-**参数:**
-NONE
+**权重:** 1
+
+**参数:** NONE
 
 **响应:**
+
 ```javascript
 {
   "listenKey": "pqia91ma19a5s61cv6a81va65sdf19v8a65a1a5s61cv6a81va65sdf19v8a65a1"
 }
 ```
 
-## 延长lisenKey有效期
+## 延长 lisenKey 有效期
+
 ```
 PUT /api/v1/userDataStream
 ```
-有效期延长至本次调用后60分钟
 
-**权重:**
-1
+有效期延长至本次调用后 60 分钟
+
+**权重:** 1
 
 **参数:**
 
-名称 | 类型 | 是否必须 | 描述
------------- | ------------ | ------------ | ------------
-listenKey | STRING | YES
+| 名称      | 类型   | 是否必须 | 描述 |
+| --------- | ------ | -------- | ---- |
+| listenKey | STRING | YES      |
 
 **响应:**
+
 ```javascript
-{}
+{
+}
 ```
 
-## 关闭listenKey
+## 关闭 listenKey
+
 ```
 DELETE /api/v1/userDataStream
 ```
+
 关闭某账户数据流
 
-**权重:**
-1
+**权重:** 1
 
 **参数:**
 
-名称 | 类型 | 是否必须 | 描述
------------- | ------------ | ------------ | ------------
-listenKey | STRING | YES
+| 名称      | 类型   | 是否必须 | 描述 |
+| --------- | ------ | -------- | ---- |
+| listenKey | STRING | YES      |
 
 **响应:**
+
 ```javascript
-{}
+{
+}
 ```
 
-# websocket推送事件
+# websocket 推送事件
 
 ## 账户更新
-账户更新事件的 event type 固定为 `outboundAccountInfo`
-当账户信息有变动时，会推送此事件
+
+账户更新事件的 event type 固定为 `outboundAccountInfo` 当账户信息有变动时，会推
+送此事件
 
 **Payload:**
+
 ```javascript
 {
   "e": "outboundAccountInfo",   // 事件类型
@@ -121,14 +132,15 @@ listenKey | STRING | YES
 ```
 
 ## 订单/交易 更新
+
 当有新订单创建、订单有新成交或者新的状态变化时会推送此类事件
 
-event type统一为 `executionReport`
+event type 统一为 `executionReport`
 
 具体内容需要读取 `x`字段 判断执行类型
 
-
 **Payload:**
+
 ```javascript
 {
   "e": "executionReport",        // 事件类型
@@ -167,11 +179,9 @@ event type统一为 `executionReport`
 
 **可能的执行类型:**
 
-* NEW 新订单
-* CANCELED 订单被取消
-* REPLACED (保留字段，当前未使用)
-* REJECTED 新订单被拒绝
-* TRADE 订单有新成交
-* EXPIRED 订单失效（根据订单的Time In Force参数）
-
-
+- NEW 新订单
+- CANCELED 订单被取消
+- REPLACED (保留字段，当前未使用)
+- REJECTED 新订单被拒绝
+- TRADE 订单有新成交
+- EXPIRED 订单失效（根据订单的 Time In Force 参数）

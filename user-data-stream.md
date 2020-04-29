@@ -1,6 +1,8 @@
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
-**Table of Contents**  *generated with [DocToc](https://github.com/thlorenz/doctoc)*
+
+**Table of Contents** _generated with
+[DocToc](https://github.com/thlorenz/doctoc)_
 
 - [General WSS information](#general-wss-information)
 - [API Endpoints](#api-endpoints)
@@ -15,30 +17,41 @@
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
 # User Data Streams for Binance (2020-04-25)
+
 # General WSS information
-* The base API endpoint is: **https://api.binance.com**
-* A User Data Stream `listenKey` is valid for 60 minutes after creation.
-* Doing a `PUT` on an active `listenKey` will extend its validity for 60 minutes.
-* Doing a `DELETE` on an active `listenKey` will close the stream and invalidate the `listenKey`.
-* Doing a `POST` on an account with an active `listenKey` will return the currently active `listenKey` and extend its validity for 60 minutes.
-* The base websocket endpoint is: **wss://stream.binance.com:9443**
-* User Data Streams are accessed at **/ws/\<listenKey\>** or **/stream?streams=\<listenKey\>**
-* A single connection to **stream.binance.com** is only valid for 24 hours; expect to be disconnected at the 24 hour mark
+
+- The base API endpoint is: **https://api.binance.com**
+- A User Data Stream `listenKey` is valid for 60 minutes after creation.
+- Doing a `PUT` on an active `listenKey` will extend its validity for 60
+  minutes.
+- Doing a `DELETE` on an active `listenKey` will close the stream and invalidate
+  the `listenKey`.
+- Doing a `POST` on an account with an active `listenKey` will return the
+  currently active `listenKey` and extend its validity for 60 minutes.
+- The base websocket endpoint is: **wss://stream.binance.com:9443**
+- User Data Streams are accessed at **/ws/\<listenKey\>** or
+  **/stream?streams=\<listenKey\>**
+- A single connection to **stream.binance.com** is only valid for 24 hours;
+  expect to be disconnected at the 24 hour mark
 
 # API Endpoints
+
 ## Create a listenKey
+
 ```
 POST /api/v3/userDataStream
 ```
-Start a new user data stream. The stream will close after 60 minutes unless a keepalive is sent. If the account has an active `listenKey`, that `listenKey` will be returned and its validity will be extended for 60 minutes.
 
-**Weight:**
-1
+Start a new user data stream. The stream will close after 60 minutes unless a
+keepalive is sent. If the account has an active `listenKey`, that `listenKey`
+will be returned and its validity will be extended for 60 minutes.
 
-**Parameters:**
-NONE
+**Weight:** 1
+
+**Parameters:** NONE
 
 **Response:**
+
 ```javascript
 {
   "listenKey": "pqia91ma19a5s61cv6a81va65sdf19v8a65a1a5s61cv6a81va65sdf19v8a65a1"
@@ -46,50 +59,60 @@ NONE
 ```
 
 ## Ping/Keep-alive a listenKey
+
 ```
 PUT /api/v3/userDataStream
 ```
-Keepalive a user data stream to prevent a time out. User data streams will close after 60 minutes. It's recommended to send a ping about every 30 minutes.
 
-**Weight:**
-1
+Keepalive a user data stream to prevent a time out. User data streams will close
+after 60 minutes. It's recommended to send a ping about every 30 minutes.
+
+**Weight:** 1
 
 **Parameters:**
 
-Name | Type | Mandatory | Description
------------- | ------------ | ------------ | ------------
-listenKey | STRING | YES
+| Name      | Type   | Mandatory | Description |
+| --------- | ------ | --------- | ----------- |
+| listenKey | STRING | YES       |
 
 **Response:**
+
 ```javascript
-{}
+{
+}
 ```
 
 ## Close a listenKey
+
 ```
 DELETE /api/v3/userDataStream
 ```
+
 Close out a user data stream.
 
-**Weight:**
-1
+**Weight:** 1
 
 **Parameters:**
 
-Name | Type | Mandatory | Description
------------- | ------------ | ------------ | ------------
-listenKey | STRING | YES
+| Name      | Type   | Mandatory | Description |
+| --------- | ------ | --------- | ----------- |
+| listenKey | STRING | YES       |
 
 **Response:**
+
 ```javascript
-{}
+{
+}
 ```
 
 # Web Socket Payloads
+
 ## Account Update
+
 Account state is updated with the `outboundAccountInfo` event.
 
 **Payload:**
+
 ```javascript
 {
   "e": "outboundAccountInfo",   // Event type
@@ -131,11 +154,13 @@ Account state is updated with the `outboundAccountInfo` event.
   ],
   "P": [                       // Account Permissions
         "SPOT"
-  ]  
+  ]
 }
 ```
 
-An additional event `outboundAccountPosition` is sent any time an account balance has changed and contains the assets that were possibly changed by the event that generated the balance change.
+An additional event `outboundAccountPosition` is sent any time an account
+balance has changed and contains the assets that were possibly changed by the
+event that generated the balance change.
 
 ```javascript
 {
@@ -155,10 +180,12 @@ An additional event `outboundAccountPosition` is sent any time an account balanc
 ## Balance Update
 
 Balance Update occurs during the following:
-* Deposits or withdrawals from the account
-* Transfer of funds between accounts (e.g. Spot to Margin)
+
+- Deposits or withdrawals from the account
+- Transfer of funds between accounts (e.g. Spot to Margin)
 
 **Payload**
+
 ```javascript
 {
   "e": "balanceUpdate",         //Event Type
@@ -170,13 +197,16 @@ Balance Update occurs during the following:
 ```
 
 ## Order Update
+
 Orders are updated with the `executionReport` event.
 
-Check the [Rest API Documentation](./rest-api.md#enum-definitions) and below for relevant enum definitions.
+Check the [Rest API Documentation](./rest-api.md#enum-definitions) and below for
+relevant enum definitions.
 
 Average price can be found by doing `Z` divided by `z`.
 
 **Payload:**
+
 ```javascript
 {
   "e": "executionReport",        // Event type
@@ -216,16 +246,22 @@ Average price can be found by doing `Z` divided by `z`.
 
 **Execution types:**
 
-* NEW - The order has been accepted into the engine.
-* CANCELED - The order has been canceled by the user. 
-* REPLACED (currently unused)
-* REJECTED - The order has been rejected and was not processed. (This is never pushed into the User Data Stream)
-* TRADE - Part of the order or all of the order's quantity has filled.
-* EXPIRED - The order was canceled according to the order type's rules (e.g. LIMIT FOK orders with no fill, LIMIT IOC or MARKET orders that partially fill) or by the exchange, (e.g. orders canceled during liquidation, orders canceled during maintenance)
+- NEW - The order has been accepted into the engine.
+- CANCELED - The order has been canceled by the user.
+- REPLACED (currently unused)
+- REJECTED - The order has been rejected and was not processed. (This is never
+  pushed into the User Data Stream)
+- TRADE - Part of the order or all of the order's quantity has filled.
+- EXPIRED - The order was canceled according to the order type's rules (e.g.
+  LIMIT FOK orders with no fill, LIMIT IOC or MARKET orders that partially fill)
+  or by the exchange, (e.g. orders canceled during liquidation, orders canceled
+  during maintenance)
 
-If the order is an OCO, an event will be displayed named `ListStatus` in addition to the `executionReport` event.
+If the order is an OCO, an event will be displayed named `ListStatus` in
+addition to the `executionReport` event.
 
 **Payload**
+
 ```javascript
 {
   "e": "listStatus",                //Event Type
@@ -252,4 +288,3 @@ If the order is an OCO, an event will be displayed named `ListStatus` in additio
   ]
 }
 ```
-
